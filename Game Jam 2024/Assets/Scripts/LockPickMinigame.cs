@@ -27,7 +27,7 @@ public class LockPickMinigame : MonoBehaviour
     Vector3 v2Pos;
     private bool isPaused = false;
     float targetPos;
-    [SerializeField] float leanency = 0.1f;
+    [SerializeField] float leanency;
 
     private GameObject bigLock;
     private GameObject door;
@@ -86,6 +86,8 @@ public class LockPickMinigame : MonoBehaviour
 
     void Start()
     {
+        leanency = GameManager.Instance.openPoint;
+
         bigLock = GameObject.FindGameObjectWithTag("LockBig");
 
         lastMousePosition = Input.mousePosition;
@@ -96,6 +98,9 @@ public class LockPickMinigame : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+       
+
         if(isPaused) return;
 
 
@@ -324,7 +329,7 @@ public class LockPickMinigame : MonoBehaviour
     {
 
 
-        if(!CameraLookAt.Instance.isDoing)
+        if (!CameraLookAt.Instance.isDoing)
         {
 
             //distance from cursor to object in vector 2
@@ -347,9 +352,19 @@ public class LockPickMinigame : MonoBehaviour
 
             Vector3 pos = Camera.main.WorldToViewportPoint(tempPos);
 
-            pickLockPos = pos.x;
 
-            
+
+            //to archive the mouse half way there
+             pickLockPos = (pos.x - 0.25f) * 2f;
+       
+
+
+
+
+
+           
+
+
 
 
 

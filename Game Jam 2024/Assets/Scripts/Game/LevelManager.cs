@@ -18,6 +18,9 @@ public class LevelManager : MonoBehaviour
     private Animator trans;
 
     public int randomBox;
+
+    public Vector3 camPos;
+   
     
 
     //Background=========================================
@@ -45,8 +48,8 @@ public class LevelManager : MonoBehaviour
 
 
 
-
-
+        camPos = Camera.main.transform.position;
+       
 
 
 
@@ -85,23 +88,34 @@ public class LevelManager : MonoBehaviour
     public void LoadLevel()
     {
         StartCoroutine(WaitForAnim(SceneManager.GetActiveScene().buildIndex + 1));  //add 1 is loading the next level in order
-        randomBox = Random.Range(0, 2);
+        randomBox = Random.Range(0, 10);
         Debug.Log("Box: " + randomBox);
+        
+
+        GameManager.Instance.openPoint -= 0.0025f;
 
 
-                if (randomBox == 0)
-                {
-                    GameManager.Instance.box.SetActive(false);
-                }
+        if (GameManager.Instance.openPoint <= 0.001f)
+        {
+            GameManager.Instance.openPoint = 0.001f;
+        }
 
-                if (randomBox == 1)
-                {
-                    Debug.Log("BoxAppear");
-                    GameManager.Instance.box.SetActive(true);
-                 }
+        if (randomBox < 7)
+        {
+            Debug.Log("BoxAppear");
+            GameManager.Instance.box.SetActive(true);
+        }
 
+        else
+        {
+            GameManager.Instance.box.SetActive(false);
+        }
 
         
+
+
+
+
 
         GameManager.Instance.jumpScareScene.SetActive(false);
 
@@ -115,14 +129,31 @@ public class LevelManager : MonoBehaviour
         trans.SetTrigger("Start");
         yield return new WaitForSeconds(transitionTime);
 
+        Debug.Log("level: " + levelIndex);
+
         if(levelIndex == 12)
         {
-            GameManager.Instance.endGame.SetActive(true);
+            //GameObject[] endGame = GameObject.FindGameObjectsWithTag("EndGameUI");
+
+            //for(int i = 0;i < endGame.Length;i++)
+            //{
+            //    if (endGame[i] == null)
+            //    {
+            //        endGame[i].SetActive(true);
+
+            //    }
+            //}
+            
             AudioManager.Instance.StopAllAudio();
             AudioManager.Instance.PlaySoundOneShot("EndGame");
 
             GameObject ui = GameObject.FindGameObjectWithTag("UI");
-            if(ui != null)
+            GameObject box = GameObject.FindGameObjectWithTag("box");
+            if (box != null)
+            {
+                box.SetActive(false);
+            }
+            if (ui != null)
             {
                 ui.SetActive(false);
             }
@@ -207,6 +238,7 @@ public class LevelManager : MonoBehaviour
         }
 
         SceneManager.LoadScene(1);
+        AudioManager.Instance.StopAllAudio();
         AudioManager.Instance.PlaySoundOneShot("Breath");
         AudioManager.Instance.PlaySoundOneShot("Theme");
 

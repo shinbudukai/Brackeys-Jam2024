@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+
 public class GameManager : MonoBehaviour
 {
     // MagGlass===========================================
@@ -74,10 +75,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject wrongDoorBoard;
     [SerializeField] GameObject consumeBoard;
     [SerializeField] public GameObject endGame;
+    [SerializeField] GameObject exitBoard;
 
     private bool wrongDoorBoardPop = false;
     private bool firstTimeConsume = true;
     public bool isEndGame = false;
+
+    [HideInInspector]
+    public int doorValueHolder;
+
+    public bool hitBack = false;
 
 
 
@@ -89,6 +96,9 @@ public class GameManager : MonoBehaviour
     public float oxyAmount;
     public float oxyGainAmount =  0;
     public bool rightDoor = false;
+
+
+    public float openPoint = 0.05f;
 
 
 
@@ -125,6 +135,7 @@ public class GameManager : MonoBehaviour
     //Jumpscare======================================
     [SerializeField] public GameObject jumpScareScene;
     public bool doneJumpScare = false;
+  
 
 
     int countTest = 5;
@@ -170,8 +181,13 @@ public class GameManager : MonoBehaviour
         //        Destroy(gameObject[i]);
 
         //    }
-            
+
         //}
+        openPoint = 0.05f;
+
+        AudioManager.Instance.StopAllAudio();
+        AudioManager.Instance.PlaySoundOneShot("Breath");
+        AudioManager.Instance.PlaySoundOneShot("Theme");
 
         isEndGame = false;
 
@@ -188,13 +204,36 @@ public class GameManager : MonoBehaviour
         firstKey = true;
         backButton.SetActive(false);
 
+        
+
 
 }
 
     // Update is called once per frame
     void Update()
     {
+        
+        
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            ExitPopUp();
+        }
         // IsPointerOverUIElement();
+
+        //reset camera smoothly
+        if(hitBack)
+        {
+
+            oldCamPos = LevelManager.Instance.camPos;
+           
+
+            Quaternion resetRotation = Quaternion.Euler(Vector3.zero);
+            Camera.main.transform.rotation = Quaternion.Lerp(Camera.main.transform.rotation, resetRotation, Time.deltaTime * 5f);
+            Camera.main.transform.position = oldCamPos;
+        }
+
+
+       
 
       
         if(isEndGame)
@@ -291,6 +330,7 @@ public class GameManager : MonoBehaviour
         Camera.main.transform.eulerAngles = new Vector3(0, 0, 0);
         PostProcessingEffect.instance.GetUnfocus();
         backButton.SetActive(false);
+        hitBack = true;
         timerOnMove = 0f;
 
 
@@ -314,6 +354,11 @@ public class GameManager : MonoBehaviour
 
         //Reset Audio
         AudioManager.Instance.StopSound("Rattle");
+        AudioManager.Instance.StopSound("LockPick1");
+        AudioManager.Instance.StopSound("LockPick2");
+        AudioManager.Instance.StopSound("LockPickShake");
+
+       
 
     }
 
@@ -469,7 +514,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-    private void UpdateCount(ref int itemsCount, string itemsName)
+    public void UpdateCount(ref int itemsCount, string itemsName)
     {
 
         GameObject temp = GameObject.FindGameObjectWithTag(itemsName);
@@ -848,38 +893,62 @@ public class GameManager : MonoBehaviour
         yield break;
     }
 
+    private void ExitPopUp()
+    {
+
+        GameObject parent = GameObject.Find("UI");
+        GameObject go = Instantiate(exitBoard, parent.transform.position, Quaternion.identity);
+        go.transform.SetParent(parent.transform);
+        Time.timeScale = 0;
+        
+    }
+
 
     public IEnumerator JumpScare(doorBehavior thisDoor)
     {
+        int triggerJumpScare = Random.Range(0, 2);
 
-       // doneJumpScare = false;
-        float randomTime = Random.Range(0, 20f);
-        yield return new WaitForSeconds(randomTime);
-       // CameraLookAt.Instance.OnShakePos(1f, 1f);
-        if(backButton.activeSelf)
+        Debug.Log(triggerJumpScare);
+        if (triggerJumpScare == 1)
         {
-            AudioManager.Instance.StopSound("JumpScare");
-            AudioManager.Instance.StopSound("HeartBeat");
-            AudioManager.Instance.StopSound("HardBreath");
-
-            jumpScareScene.SetActive(true);
-            AudioManager.Instance.PlaySoundOneShot("JumpScare");
-            AudioManager.Instance.PlaySoundOneShot("HeartBeat");
-            AudioManager.Instance.PlaySoundOneShot("HardBreath");
-            AudioManager.Instance.StopSound("Breath");
-            StartCoroutine(ReactivateSound());
-            yield return new WaitForSeconds(2f);
-            jumpScareScene.SetActive(false);
-            yield return thisDoor.isScared = true;
-            oxyGainAmount = -20f;
-
-            if(firstTimeConsume)
+            // doneJumpScare = false;
+            float randomTime = Random.Range(0, 20f);
+            yield return new WaitForSeconds(randomTime);
+            // CameraLookAt.Instance.OnShakePos(1f, 1f);
+            if (backButton.activeSelf && doorValueHolder == 0)
             {
-                StartCoroutine(ConsumeOxy1st());
+                Debug.Log("this door " + thisDoor.thisDoorValue);
+
+                AudioManager.Instance.StopSound("JumpScare");
+                AudioManager.Instance.StopSound("HeartBeat");
+                AudioManager.Instance.StopSound("HardBreath");
+
+                jumpScareScene.SetActive(true);
+                AudioManager.Instance.PlaySoundOneShot("JumpScare");
+                AudioManager.Instance.PlaySoundOneShot("HeartBeat");
+                AudioManager.Instance.PlaySoundOneShot("HardBreath");
+                AudioManager.Instance.StopSound("Breath");
+                StartCoroutine(ReactivateSound());
+                yield return new WaitForSeconds(2f);
+                jumpScareScene.SetActive(false);
+                yield return thisDoor.isScared = true;
+                oxyGainAmount = -20f;
+
+                if (firstTimeConsume)
+                {
+                    StartCoroutine(ConsumeOxy1st());
+                }
+
+
             }
-            
-            
         }
+
+        else
+        {
+            yield return null;
+        }
+
+       
         
         yield break;
     }
@@ -887,10 +956,14 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator ReactivateSound()
     {
-        yield return new WaitForSeconds(17f);
+        yield return new WaitForSeconds(19f);
+        AudioManager.Instance.StopSound("HardBreath");
         AudioManager.Instance.PlaySoundOneShot("Breath");
         yield break;
     }
+
+
+  
 
 
 

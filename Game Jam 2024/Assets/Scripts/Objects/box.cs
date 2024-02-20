@@ -54,7 +54,7 @@ public class box : MonoBehaviour
             switch (items[randomItem].tag)
             {
                 case "Mag":
-                    StartCoroutine(GameManager.Instance.PopupAnimMag());
+                    if (!GameManager.Instance.firstMag) StartCoroutine(GameManager.Instance.PopupAnimMag());
                     GameManager.Instance.magCount++;
                     items[randomItem].GetComponentInChildren<TextMeshProUGUI>().text = ("x " + GameManager.Instance.magCount);
                     if(GameManager.Instance.firstMag)
@@ -62,13 +62,16 @@ public class box : MonoBehaviour
                         Debug.Log("first time " + items[randomItem].name);
                         StartCoroutine(GameManager.Instance.PopupAnimMag1st());
                         GameManager.Instance.firstMag = false;
+                      
                     }
-                    
+
+                   
+
 
                     break;
 
                 case "UV":
-                    StartCoroutine(GameManager.Instance.PopupAnimUV());
+                    if (!GameManager.Instance.firstUV) StartCoroutine(GameManager.Instance.PopupAnimUV());
                     GameManager.Instance.uvCount++;
                     items[randomItem].GetComponentInChildren<TextMeshProUGUI>().text = ("x " + GameManager.Instance.uvCount);
                     if (GameManager.Instance.firstUV)
@@ -76,13 +79,14 @@ public class box : MonoBehaviour
                         Debug.Log("first time " + items[randomItem].name);
                         StartCoroutine(GameManager.Instance.PopupAnimUV1st());
                         GameManager.Instance.firstUV = false;
+                        
                     }
-                  
 
+                    
                     break;
 
                 case "Adre":
-                    StartCoroutine(GameManager.Instance.PopupAnimAdre());
+                    if (!GameManager.Instance.firstAdre) StartCoroutine(GameManager.Instance.PopupAnimAdre());
                     GameManager.Instance.adreCount++;
                     items[randomItem].GetComponentInChildren<TextMeshProUGUI>().text = ("x " + GameManager.Instance.adreCount);
                     if (GameManager.Instance.firstAdre)
@@ -90,9 +94,12 @@ public class box : MonoBehaviour
                         Debug.Log("first time " + items[randomItem].name);
                         StartCoroutine(GameManager.Instance.PopupAnimAdre1st());
                         GameManager.Instance.firstAdre = false;
+                        
                     }
 
                     
+
+
                     break;
 
                 case "LockPick":
@@ -102,12 +109,16 @@ public class box : MonoBehaviour
                     if (GameManager.Instance.pickCount == 1)
                     {
                         Debug.Log("first time " + items[randomItem].name);
+                        return;
                     }
+
+                    
+
                     break;
 
 
                 case "Key":
-                    StartCoroutine(GameManager.Instance.PopupAnimKey());
+                    if (!GameManager.Instance.firstKey) StartCoroutine(GameManager.Instance.PopupAnimKey());
                     GameManager.Instance.keyCount++;
                     items[randomItem].GetComponentInChildren<TextMeshProUGUI>().text = ("x " + GameManager.Instance.keyCount);
                     if (GameManager.Instance.firstKey)
@@ -115,19 +126,24 @@ public class box : MonoBehaviour
                         Debug.Log("first time " + items[randomItem].name);
                         StartCoroutine(GameManager.Instance.PopupAnimKey1st());
                         GameManager.Instance.firstKey = false;
+                        
                     }
+
+                    
                     break;
 
                 case "Oxy":
                     GameManager.Instance.oxyGainAmount = 120f;
-                    StartCoroutine(GameManager.Instance.PopupAnimOxy());
-                    GameManager.Instance.keyCount++;
+                    if (!GameManager.Instance.firstOxy) StartCoroutine(GameManager.Instance.PopupAnimOxy());
                     if (GameManager.Instance.firstOxy)
                     {
                         Debug.Log("first time " + items[randomItem].name);
                         StartCoroutine(GameManager.Instance.PopupAnimOxy1st());
                         GameManager.Instance.firstOxy = false;
+                        
                     }
+
+                    
                     break;
 
                 default:
@@ -151,8 +167,12 @@ public class box : MonoBehaviour
 
     private IEnumerator DeactiveOnTime()
     {
-        yield return new WaitForSeconds(6);
+
+        gameObject.GetComponent<SpriteRenderer>().enabled = false;
+        yield return new WaitForSeconds(6f);
+        gameObject.GetComponent<SpriteRenderer>().enabled = true;
         this.gameObject.SetActive(false);
+        
         yield return null;
     }
 

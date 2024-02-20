@@ -29,9 +29,9 @@ public class ObjectSelected : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       
+        
 
-
+        //Debug.Log("door behavior: " + gameObject.GetComponent<doorBehavior>().thisDoorValue);
     }
 
     void FixedUpdate()
@@ -43,11 +43,17 @@ public class ObjectSelected : MonoBehaviour
 
     private void OnMouseOver()
     {
+
+
         if (Input.GetMouseButtonDown(0) && !GameManager.Instance.IsPointerOverUIElement())
         {
-            if(GameManager.Instance.keyInUse && gameObject.GetComponent<doorBehavior>().thisDoorValue == 1)
+            
+            GameManager.Instance.doorValueHolder = gameObject.GetComponent<doorBehavior>().thisDoorValue;
+
+            if (GameManager.Instance.keyInUse && gameObject.GetComponent<doorBehavior>().thisDoorValue == 1)
             {
                 AudioManager.Instance.PlaySoundOneShot("Key");
+                GameManager.Instance.UpdateCount(ref GameManager.Instance.keyCount, "Key");
                 LevelManager.Instance.LoadLevel();
                 GameManager.Instance.keyInUse = false;
                 Cursor.visible = true;
@@ -66,6 +72,7 @@ public class ObjectSelected : MonoBehaviour
 
 
             CameraLookAt.Instance.LookAtObject(gameObject.transform);
+            GameManager.Instance.hitBack = false;
             moveOver = true;
         }
     }
@@ -73,13 +80,13 @@ public class ObjectSelected : MonoBehaviour
     void MoveToSelectedObject()
     {
         //Check 3DWrap
-        
-        
+
+       
 
         if (moveOver && !GameManager.Instance.keyInUse)
         {
-            AudioManager.Instance.PlaySoundOneShot("GetDoor");
 
+            
             Camera.main.eventMask = 0;
 
             GameManager.Instance.LockPickTarPosHolder(this.targetPos);
@@ -101,6 +108,7 @@ public class ObjectSelected : MonoBehaviour
 
                 ////Reset the camera Angle before instanting Lock
                 //ResetCamAng();
+                AudioManager.Instance.PlaySoundOneShot("GetDoor");
 
                 InstantiateTheLock();
 
@@ -157,7 +165,7 @@ public class ObjectSelected : MonoBehaviour
 
             else
             {
-                if (!gameObject.GetComponent<doorBehavior>().isScared)
+                if (!gameObject.GetComponent<doorBehavior>().isScared && gameObject.GetComponent<doorBehavior>().thisDoorValue == 0)
                 {
                     Debug.Log("Wrong door");
                     GameManager.Instance.rightDoor = false;

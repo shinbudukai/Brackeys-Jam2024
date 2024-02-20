@@ -458,7 +458,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tensionMultiplicator: 1
-  leanency: 0.01
+  leanency: 0.05
   lockRerotSpeed: 0.6
   lockSpeed: 1.2
   pickbreak: 0
